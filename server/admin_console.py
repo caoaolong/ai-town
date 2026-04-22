@@ -64,7 +64,9 @@ async def main(page: ft.Page) -> None:
 
     _http_proc_holder: list[asyncio.subprocess.Process | None] = [None]
     _btn_holder: list[ft.FilledButton | None] = [None]
-    _log_deque: deque[str] = deque(maxlen=500)
+    _studio_btn_holder: list[ft.FilledButton | None] = [None]
+    _http_log_deque: deque[str] = deque(maxlen=500)
+    _studio_log_deque: deque[str] = deque(maxlen=500)
     _reader_tasks: list[asyncio.Task] = []
     _studio_proc_holder: list[asyncio.subprocess.Process | None] = [None]
     _studio_reader_tasks: list[asyncio.Task] = []
@@ -72,15 +74,26 @@ async def main(page: ft.Page) -> None:
     _window_close_lock = asyncio.Lock()
 
     hint = ft.Text(value="", size=13, color=ft.Colors.GREY_800)
+    studio_hint = ft.Text(value="", size=13, color=ft.Colors.GREY_800)
     tip = ft.Text(value="", size=12, color=ft.Colors.GREEN_800)
-    log_field = ft.TextField(
+    http_log_field = ft.TextField(
         value="",
-        label="HTTP 服务日志（uvicorn 合并 stdout/stderr）",
+        label="HTTP 服务（uvicorn stdout/stderr）",
         multiline=True,
         read_only=True,
         expand=True,
-        min_lines=14,
-        max_lines=36,
+        min_lines=10,
+        max_lines=28,
+        text_align=ft.TextAlign.START,
+    )
+    studio_log_field = ft.TextField(
+        value="",
+        label="AgentScope Studio（as_studio stdout/stderr）",
+        multiline=True,
+        read_only=True,
+        expand=True,
+        min_lines=10,
+        max_lines=28,
         text_align=ft.TextAlign.START,
     )
 
@@ -113,9 +126,61 @@ async def main(page: ft.Page) -> None:
                 btn.bgcolor = None
                 btn.color = None
 
-    def _append_log_line(text: str) -> None:
-        _log_deque.append(text)
-        log_field.value = "\n".join(_log_deque)
+        sp = _studio_proc_holder[0]
+        sbtn = _studio_btn_holder[0]
+        if sp is not None and sp.returncode is None:
+            studio_hint.value = (
+                f"AgentScope Studio 运行中  |  PID {sp.pid}  |  {_agentscope_studio_url()}"
+            )
+            studio_hint.color = ft.Colors.BLUE_800
+            if sbtn is not None:
+                sbtn.content = "关闭 AgentScope Studio"
+                sbtn.icon = Icons.STOP_CIRCLE_OUTLINED
+                sbtn.bgcolor = ft.Colors.RED_700
+                sbtn.color = ft.Colors.WHITE
+        elif sp is not None:
+            studio_hint.value = f"Studio 子进程已结束（退出码 {sp.returncode}）"
+            studio_hint.color = ft.Colors.ORANGE_800
+            _studio_proc_holder[0] = None
+            if sbtn is not None:
+                sbtn.content = "启动 AgentScope Studio"
+                sbtn.icon = Icons.PLAY_ARROW
+                sbtn.bgcolor = None
+                sbtn.color = None
+        else:
+            studio_hint.value = "AgentScope Studio 未启动（as_studio / npx）"
+            studio_hint.color = ft.Colors.GREY_800
+            if sbtn is not None:
+                sbtn.content = "启动 AgentScope Studio"
+                sbtn.icon = Icons.PLAY_ARROW
+                sbtn.bgcolor = None
+                sbtn.color = None
+
+    def _append_http_log_line(text: str) -> None:
+        _http_log_deque.append(text)
+        http_log_field.value = "\n".join(_http_log_deque)
+
+    def _append_studio_log_line(text: str) -> None:
+        _studio_log_deque.append(text)
+        studio_log_field.value = "\n".join(_studio_log_deque)
+
+    async def _drain_reader_tasks(
+        tasks: list[asyncio.Task], *, per_task_timeout: float = 5.0
+    ) -> None:
+        """先结束子进程再调用：等待读协程自然读到 EOF 后退出，避免先 cancel 导致 Win Proactor 管道在 loop 关闭后才 __del__。"""
+        for t in list(tasks):
+            if t.done():
+                continue
+            try:
+                await asyncio.wait_for(t, timeout=per_task_timeout)
+            except (asyncio.TimeoutError, asyncio.CancelledError):
+                t.cancel()
+                try:
+                    await t
+                except asyncio.CancelledError:
+                    pass
+        tasks.clear()
+        await asyncio.sleep(0)
 
     async def _pump_stdout(stream: asyncio.StreamReader) -> None:
         n = 0
@@ -126,14 +191,14 @@ async def main(page: ft.Page) -> None:
                     break
                 s = line.decode("utf-8", errors="replace").rstrip("\r\n")
                 if s:
-                    _append_log_line(s)
+                    _append_http_log_line(s)
                     n += 1
                     if n % 4 == 0:
                         page.update()
         except asyncio.CancelledError:
             raise
         except Exception as ex:
-            _append_log_line(f"[日志读取异常] {ex}")
+            _append_http_log_line(f"[日志读取异常] {ex}")
         finally:
             page.update()
 
@@ -146,15 +211,17 @@ async def main(page: ft.Page) -> None:
                     break
                 s = line.decode("utf-8", errors="replace").rstrip("\r\n")
                 if s:
-                    _append_log_line(f"[as_studio] {s}")
+                    _append_studio_log_line(s)
                     n += 1
                     if n % 4 == 0:
                         page.update()
         except asyncio.CancelledError:
             raise
         except Exception as ex:
-            _append_log_line(f"[as_studio 日志读取异常] {ex}")
+            _append_studio_log_line(f"[日志读取异常] {ex}")
         finally:
+            # 子进程退出后由 _sync_ui 的 elif 分支清理 holder；此处只刷新界面
+            _sync_ui()
             page.update()
 
     async def _flash(msg: str, *, error: bool = False) -> None:
@@ -171,21 +238,14 @@ async def main(page: ft.Page) -> None:
             return
         if p is not None:
             _http_proc_holder[0] = None
-        for t in _reader_tasks:
-            if not t.done():
-                t.cancel()
-                try:
-                    await t
-                except asyncio.CancelledError:
-                    pass
-        _reader_tasks.clear()
+        await _drain_reader_tasks(_reader_tasks, per_task_timeout=2.0)
         main_py = server_dir / "main.py"
         if not main_py.is_file():
             await _flash(f"未找到 {main_py}", error=True)
             return
-        _log_deque.clear()
-        log_field.value = ""
-        _append_log_line("正在启动 uvicorn …")
+        _http_log_deque.clear()
+        http_log_field.value = ""
+        _append_http_log_line("正在启动 uvicorn …")
         page.update()
 
         _exec_args = (
@@ -228,7 +288,8 @@ async def main(page: ft.Page) -> None:
             if proc.returncode is not None:
                 await _flash(f"进程已退出（码 {proc.returncode}），请检查端口或依赖", error=True)
                 _http_proc_holder[0] = None
-                _append_log_line(f"[进程退出] returncode={proc.returncode}")
+                _append_http_log_line(f"[进程退出] returncode={proc.returncode}")
+                await _drain_reader_tasks(_reader_tasks, per_task_timeout=6.0)
                 _sync_ui()
                 page.update()
                 return
@@ -255,14 +316,7 @@ async def main(page: ft.Page) -> None:
             if interactive:
                 await _flash("没有由本工具启动的进程可关闭", error=True)
             return
-        for t in _reader_tasks:
-            if not t.done():
-                t.cancel()
-                try:
-                    await t
-                except asyncio.CancelledError:
-                    pass
-        _reader_tasks.clear()
+        stop_ok = True
         try:
             p.terminate()
             try:
@@ -273,17 +327,18 @@ async def main(page: ft.Page) -> None:
         except ProcessLookupError:
             pass
         except Exception as ex:
+            stop_ok = False
             if interactive:
                 await _flash(f"关闭异常: {ex}", error=True)
             else:
-                _append_log_line(f"[关闭异常] {ex}")
-            return
-        finally:
-            _http_proc_holder[0] = None
-            _append_log_line("[已关闭本工具启动的 HTTP 子进程]")
-            _sync_ui()
-            page.update()
-        if interactive:
+                _append_http_log_line(f"[关闭异常] {ex}")
+        await _drain_reader_tasks(_reader_tasks, per_task_timeout=6.0)
+        _http_proc_holder[0] = None
+        await asyncio.sleep(0)
+        _append_http_log_line("[已关闭本工具启动的 HTTP 子进程]")
+        _sync_ui()
+        page.update()
+        if interactive and stop_ok:
             await _flash("已关闭本工具启动的 HTTP 子进程")
 
     async def _toggle_http() -> None:
@@ -293,18 +348,13 @@ async def main(page: ft.Page) -> None:
         else:
             await _start_http()
 
-    async def _stop_as_studio(*, silent: bool = False) -> None:
+    async def _stop_as_studio(*, silent: bool = False, interactive: bool = True) -> None:
         p = _studio_proc_holder[0]
         if p is None or p.returncode is not None:
+            if interactive and not silent:
+                await _flash("没有由本工具启动的 Studio 进程可关闭", error=True)
             return
-        for t in _studio_reader_tasks:
-            if not t.done():
-                t.cancel()
-                try:
-                    await t
-                except asyncio.CancelledError:
-                    pass
-        _studio_reader_tasks.clear()
+        stop_ok = True
         try:
             p.terminate()
             try:
@@ -315,34 +365,42 @@ async def main(page: ft.Page) -> None:
         except ProcessLookupError:
             pass
         except Exception as ex:
-            if not silent:
-                _append_log_line(f"[as_studio] 结束进程异常: {ex}")
-        finally:
-            _studio_proc_holder[0] = None
-            if not silent:
-                _append_log_line("[as_studio] 已结束由本工具拉起的进程")
-            page.update()
+            stop_ok = False
+            if interactive and not silent:
+                await _flash(f"关闭 Studio 异常: {ex}", error=True)
+            elif not silent:
+                _append_studio_log_line(f"[结束进程异常] {ex}")
+        await _drain_reader_tasks(_studio_reader_tasks, per_task_timeout=6.0)
+        _studio_proc_holder[0] = None
+        await asyncio.sleep(0)
+        if not silent:
+            _append_studio_log_line("[已关闭本工具拉起的 as_studio 进程]")
+        _sync_ui()
+        page.update()
+        if interactive and not silent and stop_ok:
+            await _flash("已关闭本工具拉起的 AgentScope Studio")
 
-    async def _open_agentscope_studio() -> None:
+    async def _start_as_studio() -> None:
         sp = _studio_proc_holder[0]
         if sp is not None and sp.returncode is None:
-            await _flash("as_studio 已在运行（由本窗口启动）")
             return
+        if sp is not None:
+            _studio_proc_holder[0] = None
         argv = _resolve_as_studio_argv()
         if not argv:
             await _flash(
                 "未找到 as_studio（请 npm i -g @agentscope/studio）或 npx",
                 error=True,
             )
-            _append_log_line(
-                "[as_studio] 未解析到启动命令，可设置环境变量 AGENTSCOPE_AS_STUDIO 指定完整命令"
+            _append_studio_log_line(
+                "未解析到启动命令，可设置环境变量 AGENTSCOPE_AS_STUDIO 指定完整命令"
             )
             page.update()
             return
-        if sp is not None:
-            _studio_proc_holder[0] = None
         url = _agentscope_studio_url()
-        _append_log_line(f"[as_studio] 启动: {' '.join(argv)}（Studio 就绪后一般为 {url}）…")
+        _append_studio_log_line(
+            f"启动: {' '.join(argv)}（就绪后一般为 {url}）…"
+        )
         page.update()
         try:
             if sys.platform == "win32":
@@ -361,22 +419,30 @@ async def main(page: ft.Page) -> None:
                 )
         except Exception as ex:
             await _flash(f"启动 as_studio 失败: {ex}", error=True)
-            _append_log_line(f"[as_studio] 启动失败: {ex}")
+            _append_studio_log_line(f"启动失败: {ex}")
             page.update()
             return
         _studio_proc_holder[0] = proc
         if proc.stdout is not None:
             t = asyncio.create_task(_pump_studio_stdout(proc.stdout))
             _studio_reader_tasks.append(t)
-        await _flash("已启动 as_studio，浏览器通常会自动打开")
+        _sync_ui()
         page.update()
+        await _flash("已启动 as_studio，浏览器通常会自动打开")
+
+    async def _toggle_studio() -> None:
+        sp = _studio_proc_holder[0]
+        if sp is not None and sp.returncode is None:
+            await _stop_as_studio(silent=False, interactive=True)
+        else:
+            await _start_as_studio()
 
     async def _shutdown_before_exit() -> None:
         """窗口/会话结束前停止本工具拉起的 HTTP（不弹交互提示）。"""
         if _close_shutdown_done[0]:
             return
         _close_shutdown_done[0] = True
-        await _stop_as_studio(silent=True)
+        await _stop_as_studio(silent=True, interactive=False)
         await _stop_http(interactive=False)
 
     async def _on_window_event(e: ft.WindowEvent) -> None:
@@ -398,16 +464,17 @@ async def main(page: ft.Page) -> None:
     toggle_btn.icon = Icons.PLAY_ARROW
     toggle_btn.on_click = lambda _: page.run_task(_toggle_http)
 
-    studio_btn = ft.OutlinedButton()
+    studio_btn = ft.FilledButton()
     studio_btn.content = "启动 AgentScope Studio"
-    studio_btn.icon = Icons.OPEN_IN_NEW
+    studio_btn.icon = Icons.PLAY_ARROW
     studio_btn.tooltip = (
-        "执行本机 as_studio（就绪后一般会由 Studio 自动打开浏览器）；"
-        "若无全局命令则尝试 npx -y @agentscope/studio。"
-        "可用 AGENTSCOPE_AS_STUDIO 覆盖启动命令；AGENTSCOPE_STUDIO_URL 需与后端一致。"
+        "与 HTTP 相同：一键启动/关闭本机 as_studio；"
+        "就绪后一般会由 Studio 自动打开浏览器；无全局命令时尝试 npx -y @agentscope/studio。"
+        "可用 AGENTSCOPE_AS_STUDIO 覆盖启动命令；AGENTSCOPE_STUDIO_URL 需与后端 agentscope.init 一致。"
     )
-    studio_btn.on_click = lambda _: page.run_task(_open_agentscope_studio)
+    studio_btn.on_click = lambda _: page.run_task(_toggle_studio)
     _btn_holder[0] = toggle_btn
+    _studio_btn_holder[0] = studio_btn
     _sync_ui()
 
     if page.window is not None:
@@ -423,18 +490,54 @@ async def main(page: ft.Page) -> None:
             color=ft.Colors.GREY_700,
         ),
         hint,
+        studio_hint,
         ft.Row(
             controls=[toggle_btn, studio_btn],
             spacing=12,
             wrap=True,
         ),
         tip,
-        ft.Container(
-            content=log_field,
+        ft.Row(
             expand=True,
-            border=ft.Border.all(1, ft.Colors.GREY_400),
-            border_radius=6,
-            padding=8,
+            spacing=12,
+            controls=[
+                ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            ft.Text(
+                                value="服务端日志",
+                                size=13,
+                                weight=ft.FontWeight.W_600,
+                            ),
+                            http_log_field,
+                        ],
+                        expand=True,
+                        spacing=6,
+                    ),
+                    expand=True,
+                    border=ft.Border.all(1, ft.Colors.GREY_400),
+                    border_radius=6,
+                    padding=8,
+                ),
+                ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            ft.Text(
+                                value="AgentScope Studio 日志",
+                                size=13,
+                                weight=ft.FontWeight.W_600,
+                            ),
+                            studio_log_field,
+                        ],
+                        expand=True,
+                        spacing=6,
+                    ),
+                    expand=True,
+                    border=ft.Border.all(1, ft.Colors.GREY_400),
+                    border_radius=6,
+                    padding=8,
+                ),
+            ],
         ),
     )
 

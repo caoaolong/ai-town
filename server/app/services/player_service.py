@@ -17,7 +17,7 @@ class PlayerService:
             cls._instance = super().__new__(cls)
         return cls._instance
     
-    def create_player(self, player_id: str, name: str) -> PlayerAgent:
+    def create_player(self, player_id: str, name: str, sys_prompt: str) -> PlayerAgent:
         """
         创建新玩家
         
@@ -37,7 +37,7 @@ class PlayerService:
             api_key=Config.LLM_API_KEY,
         )
         
-        player = PlayerAgent(player_id=player_id, name=name, model=model)
+        player = PlayerAgent(player_id=player_id, name=name, sys_prompt=sys_prompt, model=model)
         self._players[player_id] = player
         
         # 注册默认技能

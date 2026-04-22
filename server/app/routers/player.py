@@ -12,6 +12,7 @@ router = APIRouter()
 class CreatePlayerRequest(BaseModel):
     """创建玩家请求"""
     name: str
+    sys_prompt: str
 
 
 class PlayerInfo(BaseModel):
@@ -59,7 +60,7 @@ async def create_player(player_id: str, request: CreatePlayerRequest) -> PlayerI
     
     使用 agentscope 的 ReActAgent 创建具备 Skills 功能的 AI 玩家
     """
-    player = player_service.create_player(player_id=player_id, name=request.name)
+    player = player_service.create_player(player_id=player_id, name=request.name, sys_prompt=request.sys_prompt)
     
     info = player.get_info()
     return PlayerInfo(**info)

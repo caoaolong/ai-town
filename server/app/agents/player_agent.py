@@ -13,7 +13,7 @@ from typing import Optional
 class PlayerAgent:
     """AI 玩家代理类"""
 
-    def __init__(self, player_id: str, name: str, model: DashScopeChatModel):
+    def __init__(self, player_id: str, name: str, sys_prompt: str, model: DashScopeChatModel):
         """
         初始化 AI 玩家
 
@@ -25,6 +25,7 @@ class PlayerAgent:
         self.player_id = player_id
         self.name = name
         self.model = model
+        self.sys_prompt = sys_prompt
         self.skills_dir = Path(__file__).parent.parent.parent / "skills"
         self.skills = []
         self._agent = None
@@ -36,7 +37,7 @@ class PlayerAgent:
         self._agent = ReActAgent(
             name=self.name,
             model=self.model,
-            sys_prompt=f"You are {self.name}, a player in AI Town.",
+            sys_prompt=self.sys_prompt,
             memory=InMemoryMemory(),
             formatter=DashScopeChatFormatter(),
             toolkit=self._toolkit,

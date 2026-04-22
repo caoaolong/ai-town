@@ -1,19 +1,33 @@
 from contextlib import asynccontextmanager
+import json
+import os
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.bootstrap_agentscope import init_agentscope_studio
-from app.bootstrap_players import load_players_at_startup
+from app.services.player_service import player_service
+import agentscope
 from app.middleware.request_audit import RequestAuditMiddleware
 from app.routers import admin, chat, health, player
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    # 先于玩家加载：后续 create_player / ReActAgent 产生的 trace 可进入 Studio
-    init_agentscope_studio()
-    load_players_at_startup()
+    _studio_url = (os.getenv("AGENTSCOPE_STUDIO_URL") or "").strip() or None
+    _project = (os.getenv("AGENTSCOPE_PROJECT") or "").strip() or None
+    agentscope.init(project=_project, studio_url=_studio_url)
+    _players_path = Path(__file__).resolve().parent / "data" / "players.json"
+    with open(_players_path, "r", encoding="utf-8") as players_file:
+        players = json.load(players_file)
+        for player_data in players:
+            sys_prompt = player_data.get("sys_prompt") or player_data.get(
+                "system_prompt", ""
+            )
+            player_service.create_player(
+                player_id=player_data["id"],
+                name=player_data["name"],
+                sys_prompt=sys_prompt,
+            )
     yield
 
 
