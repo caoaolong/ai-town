@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://7p26cb2onluk"]
+
+[ext_resource type="Script" uid="uid://dkn1ierpwyfwq" path="res://prefabs/agent_player.gd" id="1_bb1vh"]
+[ext_resource type="SpriteFrames" uid="uid://bxq3ho0bsb04n" path="res://resources/hong_mao_jie_frames.tres" id="2_kwn85"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hd7uj"]
+size = Vector2(18, 29)
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+script = ExtResource("1_bb1vh")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+sprite_frames = ExtResource("2_kwn85")
+animation = &"accept_backward"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 8.5)
+shape = SubResource("RectangleShape2D_hd7uj")
