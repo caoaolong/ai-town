@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3 uid="uid://bmcf27xq62266"]
+
+[ext_resource type="Texture2D" uid="uid://c3ct7sggxpji" path="res://resources/ui/UI_Flat_Button02a/UI_Flat_Button02a_4.png" id="1_l03v0"]
+[ext_resource type="Texture2D" uid="uid://h71fd2n28qia" path="res://resources/ui/UI_Flat_Button02a/UI_Flat_Button02a_2.png" id="2_jwshl"]
+[ext_resource type="Texture2D" uid="uid://chhh8ialc3dsl" path="res://resources/ui/question.png" id="2_l03v0"]
+[ext_resource type="Texture2D" uid="uid://5iugq8fd57te" path="res://resources/ui/UI_Flat_Button02a/UI_Flat_Button02a_3.png" id="2_okglq"]
+[ext_resource type="Script" uid="uid://dimd2cv82lkn3" path="res://prefabs/avatar.gd" id="4_0h7yq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jwshl"]
+atlas = ExtResource("2_l03v0")
+
+[node name="Avatar" type="TextureButton"]
+custom_minimum_size = Vector2(48, 48)
+offset_right = 48.0
+offset_bottom = 48.0
+toggle_mode = true
+texture_normal = ExtResource("1_l03v0")
+texture_pressed = ExtResource("2_jwshl")
+texture_hover = ExtResource("2_okglq")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("4_0h7yq")
+
+[node name="Value" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_jwshl")
+expand_mode = 4
+stretch_mode = 5
+
+[connection signal="toggled" from="." to="." method="_on_toggled"]

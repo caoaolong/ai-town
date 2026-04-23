@@ -1,5 +1,6 @@
-[gd_scene load_steps=9 format=4 uid="uid://g0j6u506wwlb"]
+[gd_scene load_steps=10 format=4 uid="uid://g0j6u506wwlb"]
 
+[ext_resource type="Script" uid="uid://cu8hw3kh2t1hg" path="res://scenes/game.gd" id="1_iywne"]
 [ext_resource type="TileSet" uid="uid://b6fu2i3iwi06r" path="res://resources/scene_tileset.tres" id="1_lnu2h"]
 [ext_resource type="Script" uid="uid://b5vjn1f0gle1e" path="res://prefabs/player_camera.gd" id="2_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://7p26cb2onluk" path="res://prefabs/hong_mao_jie.tscn" id="2_yqjtg"]
@@ -17,6 +18,7 @@ normal = Vector2(1, 0)
 normal = Vector2(-1, 0)
 
 [node name="Game" type="Node2D"]
+script = ExtResource("1_iywne")
 
 [node name="Scene" type="Node2D" parent="."]
 
@@ -44,10 +46,10 @@ follow_speed = 10.0
 [node name="Players" type="Node2D" parent="."]
 
 [node name="HongMaoJie" parent="Players" groups=["player"] instance=ExtResource("2_yqjtg")]
-position = Vector2(53, -145)
+position = Vector2(-181, -140)
 
 [node name="XiaoHei" parent="Players" groups=["player"] instance=ExtResource("3_lnu2h")]
-position = Vector2(-123, -115)
+position = Vector2(94, -28)
 
 [node name="Walls" type="Node2D" parent="."]
 

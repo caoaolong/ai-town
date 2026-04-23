@@ -1,13 +1,19 @@
-[gd_scene load_steps=4 format=3 uid="uid://c1yddn36m0his"]
+[gd_scene load_steps=6 format=3 uid="uid://c1yddn36m0his"]
 
 [ext_resource type="Script" uid="uid://dkn1ierpwyfwq" path="res://prefabs/agent_player.gd" id="1_vwbw2"]
-[ext_resource type="SpriteFrames" path="res://resources/xiao_hei_frames.tres" id="2_vwbw2"]
+[ext_resource type="SpriteFrames" uid="uid://c1mhe0tqhl3c8" path="res://resources/xiao_hei_frames.tres" id="2_vwbw2"]
+[ext_resource type="Texture2D" uid="uid://2512ynb7173s" path="res://resources/textures/xiao_hei.png" id="3_my1qs"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8ff5"]
+atlas = ExtResource("3_my1qs")
+region = Rect2(144, 20, 48, 52)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hd7uj"]
 size = Vector2(18, 29)
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 script = ExtResource("1_vwbw2")
+avatar = SubResource("AtlasTexture_k8ff5")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.5, 0.5)

@@ -1,5 +1,9 @@
 extends CharacterBody2D
 
+class_name AgentPlayer
+
+## 头像
+@export var avatar: AtlasTexture
 ## 移动速度
 @export var speed: float = 50.0
 ## 方向改变的最小时间间隔（秒）
@@ -156,4 +160,4 @@ func send_event(event_type: String, other: Node = null) -> void:
     print("[AgentPlayer] Event: %s, Other: %s" % [event_type, other])
     
     # 测试健康检查接口
-    _send_http_request("/health", HTTPClient.METHOD_GET)
+    # _send_http_request("/health", HTTPClient.METHOD_GET)

@@ -65,6 +65,7 @@ async def main(page: ft.Page) -> None:
     _http_proc_holder: list[asyncio.subprocess.Process | None] = [None]
     _btn_holder: list[ft.FilledButton | None] = [None]
     _studio_btn_holder: list[ft.FilledButton | None] = [None]
+    _init_agentscope_flag: list[bool] = [True]  # 是否在启动 HTTP 时初始化 AgentScope
     _http_log_deque: deque[str] = deque(maxlen=500)
     _studio_log_deque: deque[str] = deque(maxlen=500)
     _reader_tasks: list[asyncio.Task] = []
@@ -179,8 +180,17 @@ async def main(page: ft.Page) -> None:
                     await t
                 except asyncio.CancelledError:
                     pass
+                except Exception:
+                    # 忽略清理过程中的其他异常，避免资源警告
+                    pass
         tasks.clear()
-        await asyncio.sleep(0)
+        # 在 Windows 上，更激进地清理资源
+        if sys.platform == "win32":
+            await asyncio.sleep(0.1)
+            # 强制垃圾回收
+            import gc
+            gc.collect()
+            await asyncio.sleep(0.05)
 
     async def _pump_stdout(stream: asyncio.StreamReader) -> None:
         n = 0
@@ -197,6 +207,9 @@ async def main(page: ft.Page) -> None:
                         page.update()
         except asyncio.CancelledError:
             raise
+        except (OSError, BrokenPipeError, ConnectionResetError):
+            # 管道已关闭，正常退出
+            pass
         except Exception as ex:
             _append_http_log_line(f"[日志读取异常] {ex}")
         finally:
@@ -217,6 +230,9 @@ async def main(page: ft.Page) -> None:
                         page.update()
         except asyncio.CancelledError:
             raise
+        except (OSError, BrokenPipeError, ConnectionResetError):
+            # 管道已关闭，正常退出
+            pass
         except Exception as ex:
             _append_studio_log_line(f"[日志读取异常] {ex}")
         finally:
@@ -245,9 +261,94 @@ async def main(page: ft.Page) -> None:
             return
         _http_log_deque.clear()
         http_log_field.value = ""
+        
+        # 如果勾选了"初始化 AgentScope"，先启动 AgentScope
+        if _init_agentscope_flag[0]:
+            _append_http_log_line("检查 AgentScope Studio 是否已启动…")
+            page.update()
+            sp = _studio_proc_holder[0]
+            if sp is None or sp.returncode is not None:
+                # AgentScope 未启动，先启动它
+                _append_http_log_line("AgentScope Studio 未启动，正在启动…")
+                page.update()
+                argv = _resolve_as_studio_argv()
+                if not argv:
+                    await _flash(
+                        "未找到 as_studio 且勾选了初始化 AgentScope，请先手动启动或取消勾选",
+                        error=True,
+                    )
+                    return
+                try:
+                    if sys.platform == "win32":
+                        sp_proc = await asyncio.create_subprocess_exec(
+                            *argv,
+                            stdout=asyncio.subprocess.PIPE,
+                            stderr=asyncio.subprocess.STDOUT,
+                            env=os.environ.copy(),
+                        )
+                    else:
+                        sp_proc = await asyncio.create_subprocess_exec(
+                            *argv,
+                            stdout=asyncio.subprocess.PIPE,
+                            stderr=asyncio.subprocess.STDOUT,
+                            env=os.environ.copy(),
+                        )
+                    _studio_proc_holder[0] = sp_proc
+                    if sp_proc.stdout is not None:
+                        t = asyncio.create_task(_pump_studio_stdout(sp_proc.stdout))
+                        _studio_reader_tasks.append(t)
+                    _sync_ui()
+                except Exception as ex:
+                    await _flash(f"启动 AgentScope Studio 失败: {ex}", error=True)
+                    return
+                
+                # 等待 AgentScope Studio 就绪
+                _append_http_log_line("等待 AgentScope Studio 就绪…")
+                page.update()
+                studio_url = _agentscope_studio_url()
+                
+                # 解析 URL 获取主机和端口
+                try:
+                    from urllib.parse import urlparse
+                    parsed = urlparse(studio_url)
+                    studio_host = parsed.hostname or "localhost"
+                    studio_port = parsed.port or 3000
+                except Exception:
+                    studio_host = "localhost"
+                    studio_port = 3000
+                
+                for attempt in range(15):  # 最多等待 30 秒（15 * 2）
+                    try:
+                        _r, w = await asyncio.wait_for(
+                            asyncio.open_connection(studio_host, studio_port),
+                            timeout=1.0
+                        )
+                        w.close()
+                        try:
+                            await w.wait_closed()
+                        except Exception:
+                            pass
+                        _append_http_log_line("AgentScope Studio 已就绪")
+                        page.update()
+                        break
+                    except (OSError, asyncio.TimeoutError, ConnectionError, ValueError):
+                        if attempt < 14:
+                            await asyncio.sleep(2)
+                        else:
+                            await _flash("AgentScope Studio 启动超时，请检查配置", error=True)
+                            await _stop_as_studio(silent=True, interactive=False)
+                            return
+        
         _append_http_log_line("正在启动 uvicorn …")
         page.update()
 
+        # 准备环境变量
+        env = os.environ.copy()
+        env["INIT_AGENTSCOPE"] = "1" if _init_agentscope_flag[0] else "0"
+        
+        # 检查是否正在关闭程序，如果是则不创建管道以避免资源警告
+        is_shutting_down = _close_shutdown_done[0]
+        
         _exec_args = (
             sys.executable,
             "-m",
@@ -263,22 +364,24 @@ async def main(page: ft.Page) -> None:
                 proc = await asyncio.create_subprocess_exec(
                     *_exec_args,
                     cwd=str(server_dir),
-                    stdout=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.DEVNULL if is_shutting_down else asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.STDOUT,
                     creationflags=subprocess.CREATE_NO_WINDOW,
+                    env=env,
                 )
             else:
                 proc = await asyncio.create_subprocess_exec(
                     *_exec_args,
                     cwd=str(server_dir),
-                    stdout=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.DEVNULL if is_shutting_down else asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.STDOUT,
+                    env=env,
                 )
         except Exception as ex:
             await _flash(f"启动失败: {ex}", error=True)
             return
         _http_proc_holder[0] = proc
-        if proc.stdout is not None:
+        if proc.stdout is not None and not is_shutting_down:
             t = asyncio.create_task(_pump_stdout(proc.stdout))
             _reader_tasks.append(t)
         _sync_ui()
@@ -403,17 +506,20 @@ async def main(page: ft.Page) -> None:
         )
         page.update()
         try:
+            # 检查是否正在关闭程序，如果是则不创建管道以避免资源警告
+            is_shutting_down = _close_shutdown_done[0]
+            
             if sys.platform == "win32":
                 proc = await asyncio.create_subprocess_exec(
                     *argv,
-                    stdout=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.DEVNULL if is_shutting_down else asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.STDOUT,
                     env=os.environ.copy(),
                 )
             else:
                 proc = await asyncio.create_subprocess_exec(
                     *argv,
-                    stdout=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.DEVNULL if is_shutting_down else asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.STDOUT,
                     env=os.environ.copy(),
                 )
@@ -423,7 +529,7 @@ async def main(page: ft.Page) -> None:
             page.update()
             return
         _studio_proc_holder[0] = proc
-        if proc.stdout is not None:
+        if proc.stdout is not None and not is_shutting_down:
             t = asyncio.create_task(_pump_studio_stdout(proc.stdout))
             _studio_reader_tasks.append(t)
         _sync_ui()
@@ -431,19 +537,77 @@ async def main(page: ft.Page) -> None:
         await _flash("已启动 as_studio，浏览器通常会自动打开")
 
     async def _toggle_studio() -> None:
-        sp = _studio_proc_holder[0]
-        if sp is not None and sp.returncode is None:
-            await _stop_as_studio(silent=False, interactive=True)
+        """启动或关闭 AgentScope Studio"""
+        p = _studio_proc_holder[0]
+        if p is not None and p.returncode is None:
+            await _stop_as_studio(interactive=True)
         else:
             await _start_as_studio()
+
+    async def _clear_http_logs() -> None:
+        """清除 HTTP 服务日志"""
+        _http_log_deque.clear()
+        http_log_field.value = ""
+        page.update()
+        await _flash("HTTP 服务日志已清除")
+
+    async def _clear_studio_logs() -> None:
+        """清除 AgentScope Studio 日志"""
+        _studio_log_deque.clear()
+        studio_log_field.value = ""
+        page.update()
+        await _flash("AgentScope Studio 日志已清除")
+
+    async def _clear_all_logs() -> None:
+        """清除所有日志"""
+        _http_log_deque.clear()
+        _studio_log_deque.clear()
+        http_log_field.value = ""
+        studio_log_field.value = ""
+        page.update()
+        await _flash("所有日志已清除")
 
     async def _shutdown_before_exit() -> None:
         """窗口/会话结束前停止本工具拉起的 HTTP（不弹交互提示）。"""
         if _close_shutdown_done[0]:
             return
         _close_shutdown_done[0] = True
+        
+        # 停止所有子进程
         await _stop_as_studio(silent=True, interactive=False)
         await _stop_http(interactive=False)
+        
+        # 等待所有读取任务完成，避免管道资源警告
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(*_reader_tasks, *_studio_reader_tasks, return_exceptions=True),
+                timeout=3.0
+            )
+        except asyncio.TimeoutError:
+            # 超时后强制取消所有任务
+            for task in _reader_tasks + _studio_reader_tasks:
+                if not task.done():
+                    task.cancel()
+            try:
+                await asyncio.wait_for(
+                    asyncio.gather(*_reader_tasks, *_studio_reader_tasks, return_exceptions=True),
+                    timeout=1.0
+                )
+            except asyncio.TimeoutError:
+                pass
+        
+        # 清理任务列表
+        _reader_tasks.clear()
+        _studio_reader_tasks.clear()
+        
+        # 给事件循环更多时间来清理资源
+        await asyncio.sleep(0.2)
+        
+        # 在 Windows 上，强制垃圾回收以清理子进程传输对象
+        if sys.platform == "win32":
+            import gc
+            gc.collect()
+            await asyncio.sleep(0.1)
 
     async def _on_window_event(e: ft.WindowEvent) -> None:
         if e.type != ft.WindowEventType.CLOSE:
@@ -473,6 +637,39 @@ async def main(page: ft.Page) -> None:
         "可用 AGENTSCOPE_AS_STUDIO 覆盖启动命令；AGENTSCOPE_STUDIO_URL 需与后端 agentscope.init 一致。"
     )
     studio_btn.on_click = lambda _: page.run_task(_toggle_studio)
+
+    # 清除日志按钮
+    clear_http_btn = ft.OutlinedButton()
+    clear_http_btn.content = "清除 HTTP 日志"
+    clear_http_btn.icon = Icons.CLEAR
+    clear_http_btn.tooltip = "清除 HTTP 服务日志"
+    clear_http_btn.on_click = lambda _: page.run_task(_clear_http_logs)
+
+    clear_studio_btn = ft.OutlinedButton()
+    clear_studio_btn.content = "清除 Studio 日志"
+    clear_studio_btn.icon = Icons.CLEAR
+    clear_studio_btn.tooltip = "清除 AgentScope Studio 日志"
+    clear_studio_btn.on_click = lambda _: page.run_task(_clear_studio_logs)
+
+    clear_all_btn = ft.OutlinedButton()
+    clear_all_btn.content = "清除所有日志"
+    clear_all_btn.icon = Icons.CLEAR_ALL
+    clear_all_btn.tooltip = "清除所有日志"
+    clear_all_btn.on_click = lambda _: page.run_task(_clear_all_logs)
+
+    # 初始化 AgentScope 选择框
+    init_agentscope_checkbox = ft.Checkbox(
+        label="启动 HTTP 时初始化 AgentScope",
+        value=True,
+        tooltip="勾选后，启动 HTTP 服务时会自动启动 AgentScope Studio（如未启动）并初始化 AgentScope",
+    )
+    
+    def on_checkbox_change(e):
+        _init_agentscope_flag[0] = init_agentscope_checkbox.value or False
+        page.update()
+    
+    init_agentscope_checkbox.on_change = on_checkbox_change
+
     _btn_holder[0] = toggle_btn
     _studio_btn_holder[0] = studio_btn
     _sync_ui()
@@ -493,6 +690,12 @@ async def main(page: ft.Page) -> None:
         studio_hint,
         ft.Row(
             controls=[toggle_btn, studio_btn],
+            spacing=12,
+            wrap=True,
+        ),
+        init_agentscope_checkbox,
+        ft.Row(
+            controls=[clear_http_btn, clear_studio_btn, clear_all_btn],
             spacing=12,
             wrap=True,
         ),

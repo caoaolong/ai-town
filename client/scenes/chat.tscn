@@ -1,12 +1,17 @@
-[gd_scene format=3 uid="uid://tkvm8tyrwvpw"]
+[gd_scene load_steps=3 format=3 uid="uid://tkvm8tyrwvpw"]
 
-[node name="Control" type="Control"]
-layout_mode = 3
+[ext_resource type="Script" uid="uid://ygrqkr4qwmvr" path="res://scenes/chat.gd" id="1_4o336"]
+[ext_resource type="Texture2D" uid="uid://bbd17foxj8sbw" path="res://resources/ui/brown.png" id="1_paia3"]
+
+[node name="Control" type="NinePatchRect"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("1_paia3")
+region_rect = Rect2(4.2533007, 5.142297, 40.21523, 36.116707)
+script = ExtResource("1_4o336")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -16,9 +21,5 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="AvatarContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-text = "Chat"

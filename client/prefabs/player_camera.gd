@@ -1,10 +1,16 @@
 extends Camera2D
 
+class_name PlayerCamera
+
 ## 要跟随的目标节点
-@export var target: CharacterBody2D
+@export var target: AgentPlayer
 
 ## 跟随的缓动速度（越小越慢，越大越快）
 @export var follow_speed: float = 5.0
+
+func update_follow_target(new_target: AgentPlayer) -> void:
+    target = new_target
+    print("Camera now following: ", target.name)
 
 
 func _process(delta: float) -> void:

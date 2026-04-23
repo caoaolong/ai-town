@@ -108,3 +108,8 @@ async def player_chat(player_id: str, request: ChatRequest) -> ChatResponse:
     reply = await player.chat(request.message)
     
     return ChatResponse(reply=reply)
+
+
+@router.post("/state", tags=["player"], summary="玩家提交当前状态")
+async def player_submit_state():
+    pass

@@ -2,6 +2,10 @@
   "python-envs.defaultEnvManager": "ms-python.python:conda",
   "python-envs.defaultPackageManager": "ms-python.python:conda",
   "chat.tools.terminal.autoApprove": {
-    "D:\\envs\\aimmg\\Scripts\\pip": true
+    "D:\\envs\\aimmg\\Scripts\\pip": true,
+    "/^python -m py_compile admin_console\\.py$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
   }
 }
