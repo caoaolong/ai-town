@@ -15,5 +15,4 @@ func _ready() -> void:
 
 
 func _on_update_camera_target(new_target: AgentPlayer) -> void:
-    print("Updating camera target to: ", new_target.name)
     player_camera.update_follow_target(new_target)

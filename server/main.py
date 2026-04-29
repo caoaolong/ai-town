@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.services.player_service import player_service
 import agentscope
 from app.middleware.request_audit import RequestAuditMiddleware
-from app.routers import admin, chat, health, player
+from app.routers import admin, chat, health, player, ws
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,6 @@ async def _check_agentscope_ready(
     
     return False
 
-
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     _studio_url = (os.getenv("AGENTSCOPE_STUDIO_URL") or "").strip()
@@ -72,7 +71,7 @@ async def lifespan(_app: FastAPI):
             logger.warning("AgentScope Studio 未启动，跳过 agentscope.init() 初始化")
     else:
         logger.info("已禁用 AgentScope 初始化（INIT_AGENTSCOPE=0）")
-    
+
     _players_path = Path(__file__).resolve().parent / "data" / "players.json"
     with open(_players_path, "r", encoding="utf-8") as players_file:
         players = json.load(players_file)
@@ -88,10 +87,25 @@ async def lifespan(_app: FastAPI):
     yield
 
 
+tags_metadata = [
+    {"name": "player", "description": "玩家管理与对话接口"},
+    {"name": "chat", "description": "单独聊天接口"},
+    {"name": "admin", "description": "管理和控制 API"},
+    {"name": "health", "description": "健康检查与就绪检查"},
+    {"name": "websocket", "description": "WebSocket 实时推送接口"},
+]
+
 app = FastAPI(
     title="AI Town Server",
     description="AI Town 游戏后端服务",
     version="0.1.0",
+    terms_of_service="https://example.com/terms/",
+    contact={"name": "AI Town Support", "email": "support@example.com"},
+    license_info={"name": "MIT", "url": "https://opensource.org/licenses/MIT"},
+    openapi_tags=tags_metadata,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
     lifespan=lifespan,
 )
 
@@ -110,6 +124,7 @@ app.include_router(admin.router)
 app.include_router(health.router)
 app.include_router(chat.router)
 app.include_router(player.router)
+app.include_router(ws.router)
 
 
 @app.get("/")
@@ -119,4 +134,4 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, ws="wsproto")

@@ -15,3 +15,7 @@ class Config:
     # 服务配置
     HOST = os.getenv("SERVER_HOST", "0.0.0.0")
     PORT = int(os.getenv("SERVER_PORT", "8000"))
+
+    # Supabase 配置
+    SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")

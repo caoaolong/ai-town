@@ -10,7 +10,6 @@ class_name PlayerCamera
 
 func update_follow_target(new_target: AgentPlayer) -> void:
     target = new_target
-    print("Camera now following: ", target.name)
 
 
 func _process(delta: float) -> void:

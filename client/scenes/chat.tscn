@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://tkvm8tyrwvpw"]
+[gd_scene load_steps=5 format=3 uid="uid://tkvm8tyrwvpw"]
 
 [ext_resource type="Script" uid="uid://ygrqkr4qwmvr" path="res://scenes/chat.gd" id="1_4o336"]
 [ext_resource type="Texture2D" uid="uid://bbd17foxj8sbw" path="res://resources/ui/brown.png" id="1_paia3"]
+[ext_resource type="Script" uid="uid://cwk5pdw1x28re" path="res://scenes/debug.gd" id="3_eycpi"]
+[ext_resource type="Texture2D" uid="uid://brelpww5jlrmp" path="res://resources/ui/tile_0070.png" id="3_sbgww"]
 
 [node name="Control" type="NinePatchRect"]
 anchors_preset = 15
@@ -23,3 +25,27 @@ grow_vertical = 2
 
 [node name="AvatarContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DebugContainer" type="MarginContainer" parent="VBoxContainer" node_paths=PackedStringArray("chat_control")]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+script = ExtResource("3_eycpi")
+chat_control = NodePath("../..")
+
+[node name="Buttons" type="HBoxContainer" parent="VBoxContainer/DebugContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="SendState" type="Button" parent="VBoxContainer/DebugContainer/Buttons"]
+layout_mode = 2
+text = "发送状态"
+icon = ExtResource("3_sbgww")
+
+[connection signal="pressed" from="VBoxContainer/DebugContainer/Buttons/SendState" to="VBoxContainer/DebugContainer" method="_on_send_state_pressed"]

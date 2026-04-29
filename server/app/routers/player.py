@@ -1,8 +1,6 @@
 """玩家路由 - 处理玩家相关的 HTTP 请求"""
-
-from agentscope.message import Msg
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from app.services.player_service import player_service
 
@@ -44,8 +42,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     """玩家聊天响应"""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    reply: Msg
+    reply: str
 
 
 @router.post(
@@ -94,22 +91,17 @@ async def get_player(player_id: str) -> PlayerInfo:
     summary="与 AI 玩家对话"
 )
 async def player_chat(player_id: str, request: ChatRequest) -> ChatResponse:
-    """
-    与 AI 玩家进行对话
-    
-    AI 玩家会使用 ReAct 模式进行思考和回复
-    """
-    player = player_service.get_player(player_id)
-    
-    if player is None:
-        raise HTTPException(status_code=404, detail=f"Player {player_id} not found")
-    
-    # TODO: 主逻辑待补充
-    reply = await player.chat(request.message)
-    
-    return ChatResponse(reply=reply)
+    # TODO: 待完善
+    return ChatResponse(reply="")
 
+
+class PlayerState(BaseModel):
+    """玩家状态提交模型"""
+    player: str
+    event_type: str
+    data: dict
 
 @router.post("/state", tags=["player"], summary="玩家提交当前状态")
-async def player_submit_state():
-    pass
+async def player_submit_state(state: PlayerState):
+    print(state)
+    return {"message": f"Received state for player {state.player} with event {state.event_type}"}

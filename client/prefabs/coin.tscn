@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://4fvh6h7v8f67"]
+
+[ext_resource type="Texture2D" uid="uid://5e11xqebugoy" path="res://resources/ui/coin.webp" id="1_8bk7x"]
+[ext_resource type="FontFile" uid="uid://crj5cx7h02s6a" path="res://resources/fonts/aitown.ttf" id="2_h1t07"]
+
+[node name="Coin" type="HBoxContainer"]
+offset_right = 53.0
+offset_bottom = 48.0
+
+[node name="Icon" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("1_8bk7x")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Value" type="Label" parent="."]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_h1t07")
+theme_override_font_sizes/font_size = 24
+text = "000"
+vertical_alignment = 1
