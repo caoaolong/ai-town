@@ -5,7 +5,7 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from app.services.ws_manager import ws_manager
+from app.services.ws_manager import set_websocket, send_message
 
 logger = logging.getLogger(__name__)
 
@@ -14,48 +14,32 @@ router = APIRouter()
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    """WebSocket 主入口
+    """WebSocket 主入口（单客户端）
 
     客户端连接后可通过发送 JSON 消息进行交互：
-    - { "type": "bind", "player_id": "xxx" }   → 绑定玩家身份
     - { "type": "ping" }                       → 心跳保活
     - { "type": "chat", "payload": {...} }     → 聊天消息（示例）
     """
-    await ws_manager.connect(websocket)
+    await websocket.accept()
+    set_websocket(websocket)
     try:
         while True:
             raw = await websocket.receive_text()
             try:
                 data = json.loads(raw)
             except json.JSONDecodeError:
-                await ws_manager.send_personal_message(
-                    {"type": "error", "message": "Invalid JSON"}, websocket
-                )
+                await send_message({"type": "error", "message": "Invalid JSON"})
                 continue
 
             msg_type = data.get("type")
 
-            if msg_type == "bind":
-                player_id = data.get("player_id")
-                if player_id:
-                    ws_manager.bind_player(player_id, websocket)
-                    await ws_manager.send_personal_message(
-                        {"type": "bound", "player_id": player_id}, websocket
-                    )
-                else:
-                    await ws_manager.send_personal_message(
-                        {"type": "error", "message": "Missing player_id"}, websocket
-                    )
-
-            elif msg_type == "ping":
-                await ws_manager.send_personal_message(
-                    {"type": "pong"}, websocket
-                )
+            if msg_type == "ping":
+                await send_message({"type": "pong"})
 
             elif msg_type == "chat":
-                # 示例：收到聊天消息后广播给所有人
+                # 示例：收到聊天消息后转发
                 payload = data.get("payload", {})
-                await ws_manager.broadcast(
+                await send_message(
                     {
                         "type": "chat_broadcast",
                         "sender": payload.get("sender", "anonymous"),
@@ -64,12 +48,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 )
 
             else:
-                await ws_manager.send_personal_message(
-                    {"type": "error", "message": f"Unknown type: {msg_type}"}, websocket
+                await send_message(
+                    {"type": "error", "message": f"Unknown type: {msg_type}"}
                 )
 
     except WebSocketDisconnect:
-        ws_manager.disconnect(websocket)
-    except Exception as e:
+        set_websocket(None)
+    except Exception:
         logger.exception("WebSocket 处理异常")
-        ws_manager.disconnect(websocket)
+        set_websocket(None)

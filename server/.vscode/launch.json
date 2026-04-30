@@ -11,12 +11,5 @@
       "program": "${workspaceFolder}/main.py",
       "console": "internalConsole"
     },
-    {
-      "name": "Python Admin",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/admin_console.py",
-      "console": "internalConsole"
-    }
   ]
 }

@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from agentscope.model import DashScopeChatModel
+from agentscope.model import OpenAIChatModel
 
 from app.agents.player_agent import PlayerAgent
 from app.config import Config
@@ -65,9 +65,17 @@ class PlayerService:
         if player_id in self._players:
             return self._players[player_id]
 
-        model = DashScopeChatModel(
+        # model = DashScopeChatModel(
+        #     model_name=Config.LLM_MODEL,
+        #     api_key=Config.LLM_API_KEY,
+        # )
+        model = OpenAIChatModel(
             model_name=Config.LLM_MODEL,
             api_key=Config.LLM_API_KEY,
+            client_kwargs={
+                "base_url": Config.LLM_API_BASE,
+            },
+            reasoning_effort=None
         )
 
         player = PlayerAgent(

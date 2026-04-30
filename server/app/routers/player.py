@@ -4,6 +4,10 @@ from pydantic import BaseModel
 
 from app.services.player_service import player_service
 
+from agentscope.message import Msg
+
+from app.routers.structed_schema import ContextAgentResponse
+
 router = APIRouter()
 
 
@@ -103,5 +107,9 @@ class PlayerState(BaseModel):
 
 @router.post("/state", tags=["player"], summary="玩家提交当前状态")
 async def player_submit_state(state: PlayerState):
-    print(state)
-    return {"message": f"Received state for player {state.player} with event {state.event_type}"}
+    player = player_service.get_player(state.player)
+    if player and state.event_type == "context":
+        msg = await player(Msg(content=f"现在你的周围环境如下，你需要做出选择:\n---\n{state.data}", role="user", name="user"), structured_model=ContextAgentResponse)
+        return msg.metadata
+    else:
+        raise HTTPException(status_code=404, detail=f"Player {state.player} not found or unsupported event type")

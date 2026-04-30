@@ -6,7 +6,7 @@ from agentscope.agent import ReActAgent
 from agentscope.formatter import DashScopeChatFormatter
 from agentscope.memory import InMemoryMemory
 from agentscope.tool import ToolResponse, Toolkit
-from agentscope.model import DashScopeChatModel
+from agentscope.model import OpenAIChatModel
 from agentscope.message import TextBlock
 
 from app.db.supabase_client import get_supabase
@@ -26,7 +26,7 @@ class PlayerAgent(ReActAgent):
         player_id: str,
         name: str,
         sys_prompt: str,
-        model: DashScopeChatModel,
+        model: OpenAIChatModel,
     ):
         """
         初始化 AI 玩家

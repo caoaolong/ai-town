@@ -6,7 +6,6 @@ pydantic-settings==2.7.1
 agentscope==1.0.19
 python-dotenv==1.0.1
 websockets>=15.0.1
-flet>=0.24.0
 aiohttp>=3.9.0
 chainlit>=1.0.0
 supabase>=2.0.0
