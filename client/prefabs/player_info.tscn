@@ -1,0 +1,138 @@
+[gd_scene load_steps=10 format=3 uid="uid://b26l7lnxe6mk3"]
+
+[ext_resource type="Texture2D" uid="uid://7alwq2sh6cl8" path="res://resources/ui/UI_Flat_FrameSlot01c.png" id="1_5fdf0"]
+[ext_resource type="Texture2D" uid="uid://chhh8ialc3dsl" path="res://resources/ui/question.png" id="1_cmq1f"]
+[ext_resource type="FontFile" uid="uid://crj5cx7h02s6a" path="res://resources/fonts/aitown.ttf" id="2_dvmgj"]
+[ext_resource type="Texture2D" uid="uid://5e11xqebugoy" path="res://resources/ui/coin.webp" id="4_dp5pj"]
+[ext_resource type="Texture2D" uid="uid://dsogb4pff1i1" path="res://resources/ui/UI_Flat_BarFill01g_V.png" id="5_l61l8"]
+[ext_resource type="Texture2D" uid="uid://cende6gl8l6di" path="res://resources/ui/UI_Flat_Bar/UI_Flat_Bar08a.png" id="6_0rdgb"]
+[ext_resource type="Texture2D" uid="uid://chk74wv6l5y6a" path="res://resources/ui/UI_Flat_Bar/UI_Flat_Bar07a.png" id="7_ql412"]
+[ext_resource type="Texture2D" uid="uid://csqercisutnk7" path="res://resources/ui/UI_Flat_Bar/UI_Flat_Bar11a.png" id="8_ypn35"]
+[ext_resource type="Texture2D" uid="uid://oe80fcbmrdyg" path="res://resources/ui/UI_Flat_Bar/UI_Flat_Bar10a.png" id="9_jce06"]
+
+[node name="HBoxContainer" type="HBoxContainer"]
+offset_right = 50.0
+offset_bottom = 50.0
+theme_override_constants/separation = 8
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+texture = ExtResource("1_5fdf0")
+region_rect = Rect2(9, 9, 13, 13)
+
+[node name="Avatar" type="TextureRect" parent="NinePatchRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_cmq1f")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InfoList" type="GridContainer" parent="."]
+layout_mode = 2
+columns = 2
+
+[node name="NameLabel" type="Label" parent="InfoList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "姓名："
+
+[node name="NameValue" type="Label" parent="InfoList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "???"
+
+[node name="CoinIcon" type="TextureRect" parent="InfoList"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("4_dp5pj")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinValue" type="Label" parent="InfoList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "???"
+
+[node name="Splitter1" type="TextureRect" parent="."]
+layout_mode = 2
+texture = ExtResource("5_l61l8")
+
+[node name="StateList" type="GridContainer" parent="."]
+layout_mode = 2
+columns = 2
+
+[node name="HP" type="Label" parent="StateList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "精力："
+
+[node name="HPBar" type="TextureProgressBar" parent="StateList"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+value = 50.0
+nine_patch_stretch = true
+stretch_margin_left = 4
+stretch_margin_top = 5
+stretch_margin_right = 4
+stretch_margin_bottom = 5
+texture_under = ExtResource("6_0rdgb")
+texture_progress = ExtResource("7_ql412")
+
+[node name="PP" type="Label" parent="StateList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "激情："
+
+[node name="PPBar" type="TextureProgressBar" parent="StateList"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+value = 50.0
+nine_patch_stretch = true
+stretch_margin_left = 4
+stretch_margin_top = 5
+stretch_margin_right = 4
+stretch_margin_bottom = 5
+texture_under = ExtResource("8_ypn35")
+texture_progress = ExtResource("9_jce06")
+
+[node name="Splitter2" type="TextureRect" parent="."]
+layout_mode = 2
+texture = ExtResource("5_l61l8")
+
+[node name="DetailList" type="GridContainer" parent="."]
+layout_mode = 2
+columns = 2
+
+[node name="Bully" type="Label" parent="DetailList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "欺负/被欺负："
+
+[node name="BullyValue" type="Label" parent="DetailList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "??? / ???"
+
+[node name="Friendliness" type="Label" parent="DetailList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "友善度："
+
+[node name="FriendlinessValue" type="Label" parent="DetailList"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_dvmgj")
+theme_override_font_sizes/font_size = 12
+text = "???"

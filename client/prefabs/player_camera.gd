@@ -9,7 +9,9 @@ class_name PlayerCamera
 @export var follow_speed: float = 5.0
 
 func update_follow_target(new_target: AgentPlayer) -> void:
+    target.hide_arrow()
     target = new_target
+    target.show_arrow()
 
 
 func _process(delta: float) -> void:

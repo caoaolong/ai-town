@@ -5,6 +5,8 @@ class_name AgentPlayer
 ## 头像
 @export var avatar: AtlasTexture
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var arrow: Sprite2D = $Arrow
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
 # 添加 HTTPRequest 节点引用
 var http_request: HTTPRequest
 var tilemaps: Array[Node] = []
@@ -12,6 +14,15 @@ var tilemaps: Array[Node] = []
 func _ready() -> void:
     _init_http_request()
     tilemaps = get_node("../../Scene").get_children() as Array[Node]
+
+
+func show_arrow() -> void:
+    animation_player.play("focus")
+    arrow.visible = true
+
+func hide_arrow() -> void:
+    animation_player.stop()
+    arrow.visible = false
 
 
 func create_state() -> Dictionary:

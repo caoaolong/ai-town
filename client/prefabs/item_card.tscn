@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://dmh5tl60icrej"]
+
+[ext_resource type="Texture2D" uid="uid://cgpiutq0tlnk4" path="res://resources/ui/Card/tan.png" id="1_4iqpm"]
+[ext_resource type="Texture2D" uid="uid://hig328hlqwd5" path="res://resources/ui/Card/grey_pressed.png" id="2_7mkqw"]
+[ext_resource type="Texture2D" uid="uid://c1ioxakgr6cyf" path="res://resources/ui/Card/white.png" id="3_tecsn"]
+[ext_resource type="Texture2D" uid="uid://b11ytojxrl6ok" path="res://resources/ui/Card/grey.png" id="4_tecsn"]
+[ext_resource type="Texture2D" uid="uid://cel5xsfyusj1" path="res://resources/ui/question_white.png" id="5_e44ju"]
+[ext_resource type="FontFile" uid="uid://crj5cx7h02s6a" path="res://resources/fonts/aitown.ttf" id="6_e44ju"]
+
+[node name="ItemCard" type="TextureButton"]
+custom_minimum_size = Vector2(48, 48)
+offset_right = 48.0
+offset_bottom = 48.0
+texture_normal = ExtResource("1_4iqpm")
+texture_pressed = ExtResource("4_tecsn")
+texture_hover = ExtResource("3_tecsn")
+texture_disabled = ExtResource("2_7mkqw")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_e44ju")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -23.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("6_e44ju")
+theme_override_font_sizes/font_size = 12
+text = "???"
+horizontal_alignment = 1
+vertical_alignment = 1
