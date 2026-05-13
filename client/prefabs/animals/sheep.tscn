@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://imka2eqdni8k"]
+
+[ext_resource type="Script" uid="uid://dghu1hqq16fei" path="res://prefabs/animals/animal.gd" id="1_dkfqb"]
+[ext_resource type="SpriteFrames" uid="uid://b7aabmgpw4wiu" path="res://resources/sheep_frames.tres" id="1_qbopw"]
+
+[node name="Sheep" type="Node2D"]
+script = ExtResource("1_dkfqb")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("1_qbopw")
+autoplay = "default"
+frame_progress = 0.039393913

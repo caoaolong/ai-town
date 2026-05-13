@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" load_steps=6 format=3 uid="uid://dwjwf2fgy032m"]
+
+[ext_resource type="Texture2D" uid="uid://bm0f6jjutt3lg" path="res://resources/textures/animals/DaintyPig.png" id="1_13fu2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0wlmn"]
+atlas = ExtResource("1_13fu2")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4x6uy"]
+atlas = ExtResource("1_13fu2")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_25a48"]
+atlas = ExtResource("1_13fu2")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cg2it"]
+atlas = ExtResource("1_13fu2")
+region = Rect2(48, 0, 16, 16)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0wlmn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4x6uy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_25a48")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cg2it")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]

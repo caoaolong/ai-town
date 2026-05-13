@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://br0nrvpjr5cg"]
+
+[ext_resource type="Script" uid="uid://dghu1hqq16fei" path="res://prefabs/animals/animal.gd" id="1_758la"]
+[ext_resource type="SpriteFrames" uid="uid://dwjwf2fgy032m" path="res://resources/pig_frames.tres" id="1_8546l"]
+
+[node name="Pig" type="Node2D"]
+script = ExtResource("1_758la")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("1_8546l")
+autoplay = "default"

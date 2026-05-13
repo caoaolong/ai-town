@@ -1,16 +1,33 @@
-[gd_scene load_steps=10 format=3 uid="uid://7p26cb2onluk"]
+[gd_scene load_steps=13 format=3 uid="uid://7p26cb2onluk"]
 
 [ext_resource type="Script" uid="uid://dkn1ierpwyfwq" path="res://prefabs/agent_player.gd" id="1_bb1vh"]
 [ext_resource type="SpriteFrames" uid="uid://bxq3ho0bsb04n" path="res://resources/hong_mao_jie_frames.tres" id="2_kwn85"]
 [ext_resource type="Texture2D" uid="uid://bxksyvauotfjs" path="res://resources/ui/tile_0091.png" id="3_o8ggj"]
 [ext_resource type="Texture2D" uid="uid://du83866yvh6nj" path="res://resources/textures/hong_mao_jie.png" id="4_o8ggj"]
+[ext_resource type="Texture2D" uid="uid://dcwrkea7y1pv3" path="res://resources/textures/tile_0030.png" id="5_plgq8"]
+[ext_resource type="Texture2D" uid="uid://bb326k1m7i2m5" path="res://resources/textures/states/tile_0108.png" id="6_kdiig"]
+[ext_resource type="Texture2D" uid="uid://bi102cd6ebulf" path="res://resources/textures/states/tile_0050.png" id="7_dwbxk"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_plgq8"]
 atlas = ExtResource("4_o8ggj")
 region = Rect2(144, 21, 48, 51)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hd7uj"]
-size = Vector2(18, 29)
+size = Vector2(12, 12)
+
+[sub_resource type="Animation" id="Animation_k8ff5"]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Arrow:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-16, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
 
 [sub_resource type="Animation" id="Animation_my1qs"]
 resource_name = "focus"
@@ -25,20 +42,6 @@ tracks/0/keys = {
 "handle_modes": PackedInt32Array(0, 2, 2),
 "points": PackedFloat32Array(-24, -0.25, 0, 0.25, 0, -18, -0.06666667, -1.3333334, 0, 0, -24, -0.10000001, 1.3333334, 0, 0),
 "times": PackedFloat32Array(0, 0.4, 1)
-}
-
-[sub_resource type="Animation" id="Animation_k8ff5"]
-length = 0.001
-tracks/0/type = "bezier"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Arrow:position:y")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(-16, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_k8ff5"]
@@ -58,16 +61,33 @@ scale = Vector2(0.8, 0.8)
 texture = ExtResource("3_o8ggj")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+scale = Vector2(0.4, 0.4)
 sprite_frames = ExtResource("2_kwn85")
 animation = &"idle_backward"
 autoplay = "idle_backward"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 8.5)
+position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_hd7uj")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_k8ff5")
 }
+
+[node name="State" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(12, -15)
+texture = ExtResource("5_plgq8")
+
+[node name="Value" type="Sprite2D" parent="State"]
+position = Vector2(-1.1920929e-07, -1.0000005)
+scale = Vector2(0.49999997, 0.49999997)
+texture = ExtResource("6_kdiig")
+
+[node name="Talking" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(12, -15)
+texture = ExtResource("7_dwbxk")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]

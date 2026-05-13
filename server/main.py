@@ -9,8 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.services.player_service import player_service
 import agentscope
-from app.middleware.request_audit import RequestAuditMiddleware
-from app.routers import admin, chat, health, player, ws
+from app.routers import player, ws, prompt
 
 logger = logging.getLogger(__name__)
 
@@ -117,21 +116,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(RequestAuditMiddleware)
 
 # 注册路由
-app.include_router(admin.router)
-app.include_router(health.router)
-app.include_router(chat.router)
 app.include_router(player.router)
 app.include_router(ws.router)
+app.include_router(prompt.router)
 
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to AI Town Server", "version": "0.1.0"}
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, ws="wsproto")

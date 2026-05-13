@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://drpxoinm67nra"]
+
+[ext_resource type="Script" uid="uid://dghu1hqq16fei" path="res://prefabs/animals/animal.gd" id="1_6s1qo"]
+[ext_resource type="SpriteFrames" uid="uid://7dhrbedh1id8" path="res://resources/goose_frames.tres" id="1_utefv"]
+
+[node name="Goose" type="Node2D"]
+script = ExtResource("1_6s1qo")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("1_utefv")
+autoplay = "default"

@@ -8,7 +8,7 @@
 [ext_resource type="FontFile" uid="uid://crj5cx7h02s6a" path="res://resources/fonts/aitown.ttf" id="6_e44ju"]
 
 [node name="ItemCard" type="TextureButton"]
-custom_minimum_size = Vector2(48, 48)
+custom_minimum_size = Vector2(32, 32)
 offset_right = 48.0
 offset_bottom = 48.0
 texture_normal = ExtResource("1_4iqpm")

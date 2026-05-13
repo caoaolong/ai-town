@@ -1,0 +1,20 @@
+[
+    {
+        "name": "猪",
+        "buy_price": 50,
+        "sell_price": 300,
+        "days": 10
+    },
+    {
+        "name": "鸡",
+        "buy_price": 10,
+        "sell_price": 60,
+        "days": 3
+    },
+    {
+        "name": "鸭",
+        "buy_price": 20,
+        "sell_price": 100,
+        "days": 5
+    }
+]

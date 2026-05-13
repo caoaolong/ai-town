@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3 uid="uid://8njha65osfhc"]
+
+[ext_resource type="FontFile" uid="uid://crj5cx7h02s6a" path="res://resources/fonts/aitown.ttf" id="1_xlwfa"]
+
+[node name="TodoList" type="GridContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+columns = 4
+
+[node name="HState" type="Label" parent="."]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_xlwfa")
+theme_override_font_sizes/font_size = 14
+text = "状态"
+
+[node name="HProgressBar" type="Label" parent="."]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_xlwfa")
+theme_override_font_sizes/font_size = 14
+text = "进度"
+
+[node name="HPercent" type="Label" parent="."]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_xlwfa")
+theme_override_font_sizes/font_size = 14
+text = "占比"
+
+[node name="HThing" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("1_xlwfa")
+theme_override_font_sizes/font_size = 14
+text = "事项"

@@ -6,6 +6,7 @@ signal update_camera_target(new_target: AgentPlayer)
 
 @onready var avatar_container: HBoxContainer = $VBoxContainer/AvatarContainer
 @onready var debug_container: MarginContainer = $VBoxContainer/DebugContainer
+@onready var time_bar: TimeBar = $VBoxContainer/MarginContainer/VBoxContainer/TimeBar
 
 @export var game_scene: Node2D
 @export var player_avatar: PackedScene
@@ -15,6 +16,9 @@ const AVATAR_SCENE := preload("res://prefabs/avatar.tscn")
 var avatar_button_group: ButtonGroup
 
 func _ready():
+    # 开始配置
+    time_bar.start()
+    # 界面配置
     avatar_button_group = ButtonGroup.new()
     avatar_button_group.pressed.connect(_on_avatar_button_pressed)
     # 连接信号

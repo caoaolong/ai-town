@@ -1,0 +1,12 @@
+[
+    {
+        "action_id": "chat_with_someone",
+        "introduction": "当你遇到别的居民时可以和他聊天，在于别人交谈过程中也许会有意想不到的收获",
+        "time_consuming_second": 0
+    },
+    {
+        "action_id": "to_bully_someone",
+        "introduction": "当你遇到别的居民时可以选择欺负他，获得20金币，但是对方对你的评分会减少10分",
+        "time_consuming_second": 0
+    }
+]

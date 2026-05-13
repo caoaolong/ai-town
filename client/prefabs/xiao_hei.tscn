@@ -10,7 +10,21 @@ atlas = ExtResource("3_my1qs")
 region = Rect2(144, 20, 48, 52)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hd7uj"]
-size = Vector2(18, 29)
+size = Vector2(12, 12)
+
+[sub_resource type="Animation" id="Animation_k8ff5"]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Arrow:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-16, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
 
 [sub_resource type="Animation" id="Animation_my1qs"]
 resource_name = "focus"
@@ -25,20 +39,6 @@ tracks/0/keys = {
 "handle_modes": PackedInt32Array(0, 2, 2),
 "points": PackedFloat32Array(-24, -0.25, 0, 0.25, 0, -18, -0.06666667, -1.3333334, 0, 0, -24, -0.10000001, 1.3333334, 0, 0),
 "times": PackedFloat32Array(0, 0.4, 1)
-}
-
-[sub_resource type="Animation" id="Animation_k8ff5"]
-length = 0.001
-tracks/0/type = "bezier"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Arrow:position:y")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"handle_modes": PackedInt32Array(0),
-"points": PackedFloat32Array(-16, -0.25, 0, 0.25, 0),
-"times": PackedFloat32Array(0)
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_k8ff5"]
@@ -58,16 +58,18 @@ scale = Vector2(0.8, 0.8)
 texture = ExtResource("3_k8ff5")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+scale = Vector2(0.4, 0.4)
 sprite_frames = ExtResource("2_vwbw2")
 animation = &"idle_backward"
 autoplay = "idle_backward"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 8.5)
+position = Vector2(0, 11)
 shape = SubResource("RectangleShape2D_hd7uj")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_k8ff5")
 }
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]

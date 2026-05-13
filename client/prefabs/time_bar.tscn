@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqeoqlrrl6upo"]
+
+[ext_resource type="Script" uid="uid://cs7d7iugeioqf" path="res://prefabs/time_bar.gd" id="1_375v3"]
+[ext_resource type="FontFile" uid="uid://crj5cx7h02s6a" path="res://resources/fonts/aitown.ttf" id="1_dlv2j"]
+
+[node name="TimeBar" type="ProgressBar"]
+offset_right = 4.0
+offset_bottom = 27.0
+theme_override_fonts/font = ExtResource("1_dlv2j")
+max_value = 6000.0
+step = 1.0
+script = ExtResource("1_375v3")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

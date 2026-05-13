@@ -48,7 +48,7 @@ class PlayerService:
             for player_data in players_data:
                 player_id = player_data.get("id")
                 name = player_data.get("name")
-                sys_prompt = player_data.get("system_prompt", f"你是一个 AI 小镇的居民，名叫{name}。")
+                sys_prompt = player_data.get("system_prompt")
                 
                 if player_id and name:
                     self.create_player(player_id, name, sys_prompt)
@@ -65,10 +65,6 @@ class PlayerService:
         if player_id in self._players:
             return self._players[player_id]
 
-        # model = DashScopeChatModel(
-        #     model_name=Config.LLM_MODEL,
-        #     api_key=Config.LLM_API_KEY,
-        # )
         model = OpenAIChatModel(
             model_name=Config.LLM_MODEL,
             api_key=Config.LLM_API_KEY,
