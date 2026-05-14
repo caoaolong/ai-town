@@ -1,7 +1,11 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# 项目根目录 (server/)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class Config:
@@ -16,6 +20,3 @@ class Config:
     HOST = os.getenv("SERVER_HOST", "0.0.0.0")
     PORT = int(os.getenv("SERVER_PORT", "8000"))
 
-    # Supabase 配置
-    SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-    SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")

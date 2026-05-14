@@ -117,10 +117,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 注册路由
-app.include_router(player.router)
-app.include_router(ws.router)
-app.include_router(prompt.router)
+
+# 注册路由 - v1
+app.include_router(player.router, prefix="/v1")
+app.include_router(ws.router, prefix="/v1")
+app.include_router(prompt.router, prefix="/v1")
 
 
 @app.get("/")

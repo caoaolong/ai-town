@@ -5,4 +5,6 @@ class AITodoListResponse(BaseModel):
 
 class AITodoItem(BaseModel):
     action_id: str = Field(description="你决定执行的action_id")
+    action_label: str = Field(description="你决定执行的action_label")
+    action_description: str = Field(description="一句简单的描述，用于突出人物特点")
     action_percent: float = Field(description="你决定执行的action_id的在今天的占比，范围0-1，所有TodoItem的action_percent总和要等于1")

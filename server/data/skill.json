@@ -1,12 +1,14 @@
 [
     {
         "action_id": "chat_with_someone",
+        "action_label": "找人聊天",
         "introduction": "当你遇到别的居民时可以和他聊天，在于别人交谈过程中也许会有意想不到的收获",
         "time_consuming_second": 0
     },
     {
         "action_id": "to_bully_someone",
-        "introduction": "当你遇到别的居民时可以选择欺负他，获得20金币，但是对方对你的评分会减少10分",
+        "action_label": "欺凌弱小",
+        "introduction": "当你遇到别的居民时可以选择欺负他，有几率获得成功，成功则获得20金币",
         "time_consuming_second": 0
     }
 ]

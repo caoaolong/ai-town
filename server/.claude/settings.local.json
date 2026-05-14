@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show *)",
+      "Bash(code --list-extensions)",
+      "Bash(findstr -i ruff)",
+      "PowerShell(& \"D:\\\\envs\\\\aimmg\\\\Scripts\\\\pip.exe\" show ruff 2>&1)",
+      "Bash(code --install-extension charliermarsh.ruff)",
+      "Bash(\"C:\\\\Program Files\\\\Microsoft VS Code\\\\bin\\\\code.cmd\" --install-extension charliermarsh.ruff)",
+      "Bash(conda run *)",
+      "PowerShell(conda run -n aimmg ruff --version)",
+      "Bash(where.exe ruff *)",
+      "Bash(D:\\\\envs\\\\aimmg\\\\Scripts\\\\ruff.exe --version)",
+      "PowerShell(& \"D:\\\\envs\\\\aimmg\\\\Scripts\\\\ruff.exe\" --version)",
+      "PowerShell(& \"D:\\\\envs\\\\aimmg\\\\Scripts\\\\autopep8.exe\" --version)"
+    ],
+    "additionalDirectories": [
+      "D:\\project\\ai-town\\server"
+    ]
+  }
+}

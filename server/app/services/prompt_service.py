@@ -1,9 +1,7 @@
 """PromptService - 管理提示词"""
 
-import json
+from agentscope.message import Msg
 import logging
-from pathlib import Path
-from typing import Any
 from app.services.data_service import data_service
 
 logger = logging.getLogger(__name__)
@@ -22,5 +20,11 @@ class PromptService:
 ```
 {data_service.get_data_by_name("skill")}
 ```"""
+    
+    def player_todolist_prompt(self, day: int) -> Msg:
+        return Msg(
+        role="system", 
+        name="系统", 
+        content=f"今天是第{day}天，请制定你今天的计划表")
 
 prompt_service = PromptService()

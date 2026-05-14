@@ -20,6 +20,8 @@ async def websocket_endpoint(websocket: WebSocket):
     - { "type": "ping" }                       → 心跳保活
     - { "type": "chat", "payload": {...} }     → 聊天消息（示例）
     """
+    # 从 Header 中读取 mode 参数
+    mode = websocket.headers.get("x-mode", "default")
     await websocket.accept()
     set_websocket(websocket)
     try:
