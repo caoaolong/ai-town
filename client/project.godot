@@ -15,6 +15,10 @@ config/tags=PackedStringArray("game")
 run/main_scene="uid://ci0wxwj66yalx"
 config/features=PackedStringArray("4.5", "Forward Plus")
 
+[autoload]
+
+GM="*res://scenes/manager.gd"
+
 [global_group]
 
 world_wall=""

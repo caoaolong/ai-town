@@ -1,25 +1,30 @@
-[gd_scene load_steps=2 format=3 uid="uid://8njha65osfhc"]
+[gd_scene load_steps=3 format=3 uid="uid://8njha65osfhc"]
 
 [ext_resource type="FontFile" uid="uid://crj5cx7h02s6a" path="res://resources/fonts/aitown.ttf" id="1_xlwfa"]
+[ext_resource type="Script" uid="uid://w0hsc5s1lg1" path="res://prefabs/todo_list.gd" id="2_todo_list"]
 
 [node name="TodoList" type="GridContainer"]
 offset_right = 40.0
 offset_bottom = 40.0
 columns = 4
+script = ExtResource("2_todo_list")
 
 [node name="HState" type="Label" parent="."]
+custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_xlwfa")
 theme_override_font_sizes/font_size = 14
 text = "状态"
 
 [node name="HProgressBar" type="Label" parent="."]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_xlwfa")
 theme_override_font_sizes/font_size = 14
 text = "进度"
 
 [node name="HPercent" type="Label" parent="."]
+custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_xlwfa")
 theme_override_font_sizes/font_size = 14

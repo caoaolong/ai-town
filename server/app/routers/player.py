@@ -21,6 +21,7 @@ class TodoListRequest(BaseModel):
 
 
 class TodoListResponse(BaseModel):
+    type: str
     player_id: str
     data: AITodoListResponse
 
@@ -36,6 +37,7 @@ async def player_todolist(
 ) -> TodoListResponse:
     if mode == "dev":
         return TodoListResponse(
+            type="todolist",
             player_id=request.player_id,
             data={
                 "todo_list": [
@@ -74,4 +76,6 @@ async def player_todolist(
         prompt_service.player_todolist_prompt(request.day),
         structured_model=AITodoListResponse,
     )
-    return TodoListResponse(player_id=request.player_id, data=response.metadata)
+    return TodoListResponse(
+        type="todolist", player_id=request.player_id, data=response.metadata
+    )

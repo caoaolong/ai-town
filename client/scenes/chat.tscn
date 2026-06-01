@@ -91,7 +91,7 @@ layout_mode = 2
 
 [node name="SendState" type="Button" parent="VBoxContainer/DebugContainer/Buttons"]
 layout_mode = 2
-text = "发送状态"
+text = "创建规划"
 icon = ExtResource("3_sbgww")
 
 [node name="TestMove" type="Button" parent="VBoxContainer/DebugContainer/Buttons"]

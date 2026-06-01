@@ -4,15 +4,33 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 1. Python 虚拟环境（`.venv`）
+
+在项目根目录 `server/` 下创建并启用虚拟环境：
+
+**Windows（PowerShell / CMD）**
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+```
+
+**Linux / macOS**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+使用 **VS Code / Cursor** 且工作区是整个 `ai-town` 仓库（而不是单开 `server`）时，`server/.vscode/settings.json` 不会自动作为主设置；请在命令面板中把 Python 解释器选为：`server\.venv\Scripts\python.exe`（或 `server/.venv/bin/python`，视系统而定）。
+
+### 2. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 启动服务
+### 3. 启动服务
 
-**方式一：使用启动脚本**
+**方式一：使用启动脚本**（需已创建 `.venv`，脚本会自动激活并安装依赖）
 ```bash
 start.bat
 ```

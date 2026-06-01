@@ -2,7 +2,7 @@ extends Node2D
 
 signal update_players(players: Array[AgentPlayer])
 
-@onready var player_group: Node2D = $Players
+@onready var player_group: Node2D = $Scene/Players
 @onready var player_camera: PlayerCamera = $PlayerCamera
 
 @export var chat_scene: ChatControl

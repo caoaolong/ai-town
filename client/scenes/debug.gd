@@ -4,16 +4,18 @@ var player: AgentPlayer = null
 
 
 func _on_send_state_pressed() -> void:
-    if player != null:
-        var state = player.create_state()
-        player.send_state(Config.EV_CONTEXT, state)
+    if player == null:
+        return
+    player.create_todolist()
 
 func _on_update_camera_target(new_target: AgentPlayer) -> void:
     player = new_target
 
 func _on_test_move_pressed() -> void:
+    pass
+
+
+func _on_debug_walk(world_pos: Vector2) -> void:
     if player == null:
         return
-    var context = Schema.Context.new()
-    context.direction = Config.DIRECTIONS.pick_random()
-    player.goto_target(context)
+    player.move_to(world_pos)

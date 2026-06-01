@@ -1,8 +1,9 @@
 {
-  "python-envs.defaultEnvManager": "ms-python.python:conda",
-  "python-envs.defaultPackageManager": "ms-python.python:conda",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
   "chat.tools.terminal.autoApprove": {
-    "D:\\envs\\aimmg\\Scripts\\pip": true
+    "${workspaceFolder}/.venv/Scripts/pip": true,
+    "${workspaceFolder}/.venv/Scripts/pip.exe": true
   },
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",

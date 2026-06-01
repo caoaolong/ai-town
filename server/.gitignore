@@ -1,1 +1,4 @@
 .chainlit
+
+# Python 虚拟环境（本仓库默认使用 server/.venv）
+.venv/

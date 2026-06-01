@@ -25,6 +25,9 @@ func _ready():
     game_scene.update_players.connect(_on_update_players)
     # 连接调试界面信号
     update_camera_target.connect(debug_container._on_update_camera_target)
+    # 连接 Market 点击调试信号
+    var market := game_scene.get_node("Points/Market")
+    market._debug_walk.connect(debug_container._on_debug_walk)
 
 func _on_update_players(_players):
     for i in range(_players.size()):
